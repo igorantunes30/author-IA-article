@@ -1,7 +1,7 @@
 {
-  "name": "caveman-opencode-plugin",
+  "name": "ieee-paper-writer-opencode-plugin",
   "version": "0.1.0",
-  "description": "caveman plugin for opencode — terse mode tracking + slash commands",
+  "description": "ieee-paper-writer plugin for opencode — four-agent pipeline",
   "type": "module",
   "main": "plugin.js",
   "private": true

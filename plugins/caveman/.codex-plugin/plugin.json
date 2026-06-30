@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "description": "Ultra-compressed communication mode. Cut filler. Keep technical accuracy.",
   "author": {
-    "name": "Julius Brussee",
-    "url": "https://github.com/JuliusBrussee"
+    "name": "Ivan Igor Antunes Neves",
+    "url": "https://github.com/igorantunes30"
   },
-  "homepage": "https://github.com/JuliusBrussee/caveman",
-  "repository": "https://github.com/JuliusBrussee/caveman",
+  "homepage": "https://github.com/igorantunes30/author-IA-article",
+  "repository": "https://github.com/igorantunes30/author-IA-article",
   "license": "MIT",
   "keywords": [
     "productivity",
@@ -20,14 +20,14 @@
     "displayName": "Caveman",
     "shortDescription": "Talk like caveman. Cut filler. Keep technical accuracy.",
     "longDescription": "Ultra-compressed communication mode for Codex. Use fewer words. Keep exact technical substance.",
-    "developerName": "Julius Brussee",
+    "developerName": "Ivan Igor Antunes Neves",
     "category": "Productivity",
     "capabilities": [
       "Write"
     ],
-    "websiteURL": "https://github.com/JuliusBrussee/caveman",
-    "privacyPolicyURL": "https://github.com/JuliusBrussee/caveman/blob/main/README.md",
-    "termsOfServiceURL": "https://github.com/JuliusBrussee/caveman/blob/main/LICENSE",
+    "websiteURL": "https://github.com/igorantunes30/author-IA-article",
+    "privacyPolicyURL": "https://github.com/igorantunes30/author-IA-article/blob/main/README.md",
+    "termsOfServiceURL": "https://github.com/igorantunes30/author-IA-article/blob/main/LICENSE",
     "defaultPrompt": [
       "Use caveman mode. Cut filler. Keep technical accuracy."
     ],
