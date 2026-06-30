@@ -114,7 +114,7 @@ process.stdin.on('end', () => {
         hookSpecificOutput: {
           hookEventName: 'UserPromptSubmit',
           additionalContext:
-            '[AUTHOR] MODE ACTIVE — overrides all other style modes including caveman/terse. ' +
+            '[AUTHOR] MODE ACTIVE — overrides all other style modes. ' +
             'Write in complete formal sentences. Formal IEEE academic prose only. ' +
             'Technical subjects (no I/we/our). Scientific verbs. ' +
             'Terminological consistency. Varied rhythm. ' +

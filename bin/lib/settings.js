@@ -9,9 +9,9 @@
 //   writeSettings(path, obj)       → atomic write with newline
 //   stripJsonComments(src)         → string with // and /* */ stripped (string-aware)
 //   validateHookFields(settings)   → mutates: drops malformed hook entries
-//   hasCavemanHook(settings, ev)   → idempotency probe
+//   hasIeeePaperWriterHook(settings, ev) → idempotency probe
 //   addCommandHook(settings, ev, opts) → no-op if substring marker already present
-//   removeCavemanHooks(settings)   → uninstall helper
+//   removeIeeePaperWriterHooks(settings) → uninstall helper
 //
 // Pure stdlib, CommonJS, Node ≥14.
 
@@ -141,7 +141,7 @@ function addCommandHook(settings, event, opts) {
   if (!settings.hooks) settings.hooks = {};
   if (!Array.isArray(settings.hooks[event])) settings.hooks[event] = [];
   const marker = opts.marker || opts.command;
-  if (hasCavemanHook(settings, event, marker)) return false;
+  if (hasIeeePaperWriterHook(settings, event, marker)) return false;
   const hook = { type: 'command', command: opts.command };
   if (typeof opts.timeout === 'number') hook.timeout = opts.timeout;
   if (typeof opts.statusMessage === 'string') hook.statusMessage = opts.statusMessage;
@@ -149,7 +149,7 @@ function addCommandHook(settings, event, opts) {
   return true;
 }
 
-// ── removeCavemanHooks ────────────────────────────────────────────────────
+// ── removeIeeePaperWriterHooks ─────────────────────────────────────────────
 // Strip every entry whose any hook command mentions `marker`. Empties events.
 // Tolerates malformed pre-existing settings (non-array hook lists, foreign
 // shapes) — those get dropped by validateHookFields first so we never call
@@ -300,9 +300,11 @@ module.exports = {
   readSettings,
   writeSettings,
   validateHookFields,
-  hasCavemanHook,
+  hasIeeePaperWriterHook,
+  hasCavemanHook: hasIeeePaperWriterHook,
   addCommandHook,
-  removeCavemanHooks,
+  removeIeeePaperWriterHooks,
+  removeCavemanHooks: removeIeeePaperWriterHooks,
   rewriteLegacyManagedHookCommands,
   pruneOrphanedManagedHooks,
   claudeConfigDir,

@@ -36,19 +36,12 @@ const REPO = 'igorantunes30/author-IA-article';
 const PINNED_REF = process.env.PAPER_WRITER_REF || 'v1.9.0';
 const RAW_BASE = `https://raw.githubusercontent.com/${REPO}/${PINNED_REF}`;
 const HOOKS_REMOTE = `${RAW_BASE}/src/hooks`;
-const INIT_SCRIPT_URL = `${RAW_BASE}/src/tools/caveman-init.js`;
-const MCP_SHRINK_PKG = 'caveman-shrink';
-// Hook files to copy. Statusline ships in both .sh (macOS/Linux) and .ps1
-// (Windows) flavors — copy both regardless of host OS so a roaming
-// $CLAUDE_CONFIG_DIR (e.g. dotfiles repo) keeps working across platforms.
+const INIT_SCRIPT_URL = `${RAW_BASE}/src/tools/ieee-paper-init.js`;
+const MCP_SHRINK_PKG = 'ieee-paper-mcp';
 const HOOK_FILES = [
   'package.json',
-  'caveman-config.js',
-  'caveman-activate.js',
-  'caveman-mode-tracker.js',
-  'caveman-stats.js',
-  'caveman-statusline.sh',
-  'caveman-statusline.ps1',
+  'ieee-paper-activate.js',
+  'ieee-paper-tracker.js',
 ];
 
 // ── Argv ───────────────────────────────────────────────────────────────────
@@ -63,9 +56,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     // --with-mcp-shrink=<upstream cmd>  (handled before the switch so the
-    // GNU-style =value form is recognized). Bare --with-mcp-shrink falls
-    // through to the switch and is rejected — caveman-shrink is a proxy
-    // and a stub registration just lands the user in a broken-MCP loop (#474).
+    // GNU-style =value form is recognized).
     if (a.startsWith('--with-mcp-shrink=')) {
       const raw = a.slice('--with-mcp-shrink='.length);
       const tokens = raw.trim().split(/\s+/).filter(Boolean);
@@ -76,6 +67,7 @@ function parseArgs(argv) {
       opts.withMcpShrink = tokens;
       continue;
     }
+    // fall-through
     switch (a) {
       case '--dry-run': opts.dryRun = true; break;
       case '--force': opts.force = true; break;
@@ -94,9 +86,8 @@ function parseArgs(argv) {
           }
           opts.withMcpShrink = tokens;
         } else {
-          die('error: --with-mcp-shrink requires an upstream command — caveman-shrink\n' +
-              '  is a proxy and exits immediately without one. Pass the upstream:\n' +
-              '  --with-mcp-shrink="npx @modelcontextprotocol/server-filesystem /path"');
+          die('error: --with-mcp-shrink requires an upstream command\n' +
+              '  example: --with-mcp-shrink="npx @modelcontextprotocol/server-filesystem /path"');
         }
         break;
       }
@@ -133,8 +124,7 @@ function parseArgs(argv) {
   //   • withHooks — left at 'auto' so installClaude() can skip standalone
   //     settings.json wiring when the plugin manifest already wires the hooks
   //     (duplicate registration fires both per event — issue #392).
-  //   • withMcpShrink — caveman-shrink is a proxy that needs an upstream
-  //     command, so there's no sensible "everything on" default (issue #474).
+  //   • withMcpShrink — requires an upstream command; no sensible default.
   //     Opt in explicitly with --with-mcp-shrink="<upstream cmd>".
   if (opts.all) { opts.withInit = true; }
   if (opts.minimal) { opts.withHooks = false; opts.withInit = false; opts.withMcpShrink = false; }
@@ -453,7 +443,7 @@ async function installClaude(ctx) {
   // Self-heal: drop managed settings.json hook/statusLine entries whose target
   // script no longer exists (issue #471). Migrating an old manual install to
   // the plugin leaves settings.json pointing at removed ~/.claude/hooks/
-  // caveman-*.js scripts, so Claude Code crashes every SessionStart /
+  // ieee-paper-*.js scripts, so Claude Code crashes every SessionStart /
   // UserPromptSubmit with `loader:1478 — Cannot find module …`. Runs
   // unconditionally so it repairs an already-dirty config even when we then
   // skip standalone wiring because the plugin manifest handles hooks.
@@ -509,11 +499,11 @@ async function installClaude(ctx) {
   }
 
   if (opts.withMcpShrink) {
-    say('  → wiring caveman-shrink MCP proxy (--with-mcp-shrink)');
+    say('  → wiring MCP proxy (--with-mcp-shrink)');
     const r = installMcpShrink(ctx);
-    if (r.kind === 'ok')   results.installed.push('caveman-shrink');
-    if (r.kind === 'skip') results.skipped.push(['caveman-shrink', r.why]);
-    if (r.kind === 'fail') results.failed.push(['caveman-shrink', r.why]);
+    if (r.kind === 'ok')   results.installed.push('ieee-paper-mcp');
+    if (r.kind === 'skip') results.skipped.push(['ieee-paper-mcp', r.why]);
+    if (r.kind === 'fail') results.failed.push(['ieee-paper-mcp', r.why]);
   }
 
   process.stdout.write('\n');
@@ -566,16 +556,16 @@ function installViaSkills(ctx, prov) {
 // opencode.json with a "plugin" array entry. Mirrors the Claude Code hook
 // architecture as closely as opencode allows — only the statusline is missing
 // (opencode's TUI exposes no plugin-writable badge).
-const OPENCODE_SKILL_DIRS  = ['caveman', 'caveman-commit', 'caveman-review', 'caveman-help', 'caveman-stats', 'caveman-compress', 'cavecrew'];
-const OPENCODE_AGENT_FILES = ['cavecrew-investigator.md', 'cavecrew-builder.md', 'cavecrew-reviewer.md'];
-const OPENCODE_COMMAND_FILES = ['caveman.md', 'caveman-commit.md', 'caveman-review.md', 'caveman-compress.md', 'caveman-stats.md', 'caveman-help.md'];
+const OPENCODE_SKILL_DIRS  = ['ieee-paper-writer'];
+const OPENCODE_AGENT_FILES = ['ieee-paper-author.md', 'ieee-paper-editorial.md', 'ieee-paper-style.md', 'ieee-paper-reviewer.md'];
+const OPENCODE_COMMAND_FILES = ['ieee-paper-writer.md'];
 const OPENCODE_PLUGIN_REL = './plugins/ieee-paper-writer/plugin.js';
 const OPENCODE_AGENTS_MD_SENTINEL = 'ieee-paper-writer pipeline';
 // Marker fence for the opencode AGENTS.md ruleset block. Same convention as
 // bin/lib/openclaw.js for SOUL.md — lets us strip our block cleanly even when
 // the user has authored content above AND below it.
-const OPENCODE_AGENTS_MD_BEGIN = '<!-- caveman-begin -->';
-const OPENCODE_AGENTS_MD_END = '<!-- caveman-end -->';
+const OPENCODE_AGENTS_MD_BEGIN = '<!-- ieee-paper-begin -->';
+const OPENCODE_AGENTS_MD_END = '<!-- ieee-paper-end -->';
 
 function opencodeConfigDir() {
   // opencode uses ~/.config/opencode on every platform (on Windows that's
@@ -608,7 +598,7 @@ function installOpencode(ctx) {
   }
 
   const dir = opencodeConfigDir();
-  const pluginDir   = path.join(dir, 'plugins', 'caveman');
+  const pluginDir   = path.join(dir, 'plugins', 'ieee-paper-writer');
   const commandsDir = path.join(dir, 'commands');
   const agentsDir   = path.join(dir, 'agents');
   const skillsDir   = path.join(dir, 'skills');
@@ -617,11 +607,11 @@ function installOpencode(ctx) {
 
   if (opts.dryRun) {
     note(`  would mkdir ${pluginDir}/, ${commandsDir}/, ${agentsDir}/, ${skillsDir}/`);
-    note(`  would copy plugin.js + package.json + caveman-config.cjs into ${pluginDir}/`);
+    note(`  would copy plugin.js + package.json into ${pluginDir}/`);
     note(`  would copy ${OPENCODE_COMMAND_FILES.length} command files into ${commandsDir}/`);
-    note(`  would copy ${OPENCODE_AGENT_FILES.length} cavecrew agents into ${agentsDir}/`);
+    note(`  would copy ${OPENCODE_AGENT_FILES.length} pipeline agents into ${agentsDir}/`);
     note(`  would copy ${OPENCODE_SKILL_DIRS.length} skill dirs into ${skillsDir}/`);
-    note(`  would patch ${opencodeJson} with "plugin" entry${opts.withMcpShrink ? ' + caveman-shrink MCP' : ''}`);
+    note(`  would patch ${opencodeJson} with "plugin" entry${opts.withMcpShrink ? ' + ieee-paper-mcp MCP' : ''}`);
     note(`  would write Tier-3 ruleset to ${agentsMd}`);
     results.installed.push('opencode');
     process.stdout.write('\n');
@@ -629,18 +619,12 @@ function installOpencode(ctx) {
   }
 
   try {
-    // 1. Plugin dir — copy plugin.js, package.json, caveman-config.js (sibling).
-    //    Same `--force` semantic as commands/agents/skills below: re-runs leave
-    //    user edits to plugin.js alone unless --force is passed.
+    // 1. Plugin dir — copy plugin.js and package.json.
     fs.mkdirSync(pluginDir, { recursive: true });
     const pluginSrc = path.join(repoRoot, 'src', 'plugins', 'opencode');
     const pluginPayload = [
       [path.join(pluginSrc, 'plugin.js'),    path.join(pluginDir, 'plugin.js')],
       [path.join(pluginSrc, 'package.json'), path.join(pluginDir, 'package.json')],
-      // Renamed to .cjs because the plugin dir is "type": "module" — a bare .js
-      // sibling would be loaded as ESM and break the plugin's require() bridge.
-      [path.join(repoRoot, 'src', 'hooks', 'caveman-config.js'),
-       path.join(pluginDir, 'caveman-config.cjs')],
     ];
     for (const [src, dest] of pluginPayload) {
       if (fs.existsSync(dest) && !opts.force) {
@@ -695,7 +679,7 @@ function installOpencode(ctx) {
     //    a later --uninstall can strip our block cleanly even if the user has
     //    authored content above AND below it. Idempotency check uses the begin
     //    marker (the legacy sentinel still matches old installs).
-    const ruleBody = fs.readFileSync(path.join(repoRoot, 'src', 'rules', 'caveman-activate.md'), 'utf8').trimEnd() + '\n';
+    const ruleBody = fs.readFileSync(path.join(repoRoot, 'src', 'rules', 'ieee-paper-activate.md'), 'utf8').trimEnd() + '\n';
     const fencedBlock = `${OPENCODE_AGENTS_MD_BEGIN}\n${ruleBody}${OPENCODE_AGENTS_MD_END}\n`;
     if (fs.existsSync(agentsMd)) {
       const existing = fs.readFileSync(agentsMd, 'utf8');
@@ -724,7 +708,7 @@ function installOpencode(ctx) {
       process.stdout.write(`  installed: ${agentsMd}\n`);
     }
 
-    // 6. opencode.json — add plugin entry; optional caveman-shrink MCP.
+    // 6. opencode.json — add plugin entry; optional MCP proxy.
     let cfg = SETTINGS.readSettings(opencodeJson);
     if (cfg === null) {
       warn(`  ${opencodeJson} unparseable; will not touch it. Edit manually then re-run.`);
@@ -743,17 +727,14 @@ function installOpencode(ctx) {
       cfg.plugin.push(OPENCODE_PLUGIN_REL);
     }
     if (opts.withMcpShrink) {
-      // opts.withMcpShrink is the array of upstream-cmd tokens parseArgs
-      // produced. caveman-shrink is a proxy — it crashes without an upstream,
-      // so we always wire one through.
       if (!cfg.mcp || typeof cfg.mcp !== 'object') cfg.mcp = {};
-      if (!cfg.mcp['caveman-shrink']) {
-        cfg.mcp['caveman-shrink'] = {
+      if (!cfg.mcp['ieee-paper-mcp']) {
+        cfg.mcp['ieee-paper-mcp'] = {
           type: 'local',
           command: ['npx', '-y', MCP_SHRINK_PKG, ...opts.withMcpShrink],
           enabled: true,
         };
-        process.stdout.write(`  registered caveman-shrink MCP server (wraps: ${opts.withMcpShrink.join(' ')})\n`);
+        process.stdout.write(`  registered ieee-paper-mcp MCP server (wraps: ${opts.withMcpShrink.join(' ')})\n`);
       }
     }
     SETTINGS.writeSettings(opencodeJson, cfg);
@@ -846,9 +827,6 @@ async function installHooks(ctx) {
     process.stdout.write(`  installed: ${dest}\n`);
   }
 
-  // chmod statusline (no-op on Windows)
-  try { fs.chmodSync(path.join(hooksDir, 'caveman-statusline.sh'), 0o755); } catch (_) {}
-
   // Merge into settings.json
   let settings = SETTINGS.readSettings(settingsPath);
   if (settings === null) {
@@ -864,49 +842,25 @@ async function installHooks(ctx) {
   }
 
   const node = absoluteNodePath();
-  const activate = path.join(hooksDir, 'caveman-activate.js');
-  const tracker  = path.join(hooksDir, 'caveman-mode-tracker.js');
-  const statusline = path.join(hooksDir, 'caveman-statusline.sh');
+  const activate = path.join(hooksDir, 'ieee-paper-activate.js');
+  const tracker  = path.join(hooksDir, 'ieee-paper-tracker.js');
 
   // Migrate any legacy bare-`node` invocations of our managed scripts.
   SETTINGS.rewriteLegacyManagedHookCommands(settings, node);
 
   SETTINGS.addCommandHook(settings, 'SessionStart', {
     command: `"${node}" "${activate}"`,
-    marker: 'caveman-activate',
+    marker: 'ieee-paper-activate',
     timeout: 5,
     statusMessage: 'Loading ieee-paper-writer...',
   });
 
   SETTINGS.addCommandHook(settings, 'UserPromptSubmit', {
     command: `"${node}" "${tracker}"`,
-    marker: 'caveman-mode-tracker',
+    marker: 'ieee-paper-tracker',
     timeout: 5,
-    statusMessage: 'Tracking ieee-paper-writer mode...',
+    statusMessage: 'Tracking ieee-paper-writer...',
   });
-
-  // Statusline — set if absent or already pointing at our script.
-  // Windows: prefer pwsh (PowerShell 7+, cross-platform), fall back to
-  // powershell.exe (Windows PowerShell 5.1, ships with every Windows install).
-  // Use -ExecutionPolicy Bypass so users without RemoteSigned policy can run.
-  const psHost = IS_WIN && hasCmd('pwsh') ? 'pwsh' : (IS_WIN ? 'powershell' : null);
-  const slCmd = IS_WIN
-    ? `${psHost} -NoProfile -ExecutionPolicy Bypass -File "${path.join(hooksDir, 'caveman-statusline.ps1')}"`
-    : `bash "${statusline}"`;
-  if (!settings.statusLine) {
-    settings.statusLine = { type: 'command', command: slCmd };
-    process.stdout.write('  statusline badge configured.\n');
-  } else {
-    const existing = typeof settings.statusLine === 'string'
-      ? settings.statusLine
-      : (settings.statusLine.command || '');
-    if (existing.includes(statusline) || existing.includes('caveman-statusline')) {
-      process.stdout.write('  statusline badge already configured.\n');
-    } else {
-      process.stdout.write('  NOTE: existing statusline detected — ieee-paper-writer badge NOT added.\n');
-      process.stdout.write('        See src/hooks/README.md to add the badge to your existing statusline.\n');
-    }
-  }
 
   // Defensive validation before write — Claude Code Zod will discard the
   // entire settings.json if any single hook is malformed (#249-class footgun).
@@ -920,34 +874,21 @@ async function installHooks(ctx) {
 function installMcpShrink(ctx) {
   const { note, warn, opts } = ctx;
   // Probe npm first — registry outage = clean skip with manual snippet.
-  const probe = captureSpawn('npm', ['view', MCP_SHRINK_PKG, 'name']);
-  if (probe.status !== 0) {
-    warn(`    'npm view ${MCP_SHRINK_PKG}' returned no metadata — registry unreachable or package missing.`);
-    note('    Skipping registration. Re-run --with-mcp-shrink when the registry is reachable.');
-    return { kind: 'skip', why: 'npm registry probe failed' };
-  }
-  // Detect modern `claude mcp add`
+  const upstream = opts.withMcpShrink;
   const help = captureSpawn('claude', ['mcp', '--help']);
   if (help.status !== 0) {
-    note("    'claude mcp add' not available on this CLI. Add the snippet from");
-    note('    src/hooks/README.md to your Claude Code MCP config manually.');
+    note("    'claude mcp add' not available on this CLI. Add the MCP entry manually.");
     return { kind: 'skip', why: 'manual config required' };
   }
-  // opts.withMcpShrink is always an array of upstream-cmd tokens by the
-  // time we get here; parseArgs rejects bare --with-mcp-shrink. The proxy
-  // gets `npx -y caveman-shrink <upstream tokens...>` so it has something
-  // to wrap.
-  const upstream = opts.withMcpShrink;
   const r = runSpawn(
     'claude',
-    ['mcp', 'add', 'caveman-shrink', '--', 'npx', '-y', MCP_SHRINK_PKG, ...upstream],
+    ['mcp', 'add', 'ieee-paper-mcp', '--', 'npx', '-y', MCP_SHRINK_PKG, ...upstream],
     null, opts.dryRun
   );
   if ((r.status || 0) === 0) {
     note(`    registered, wrapping: ${upstream.join(' ')}`);
-    note(`    Edit ~/.claude.json mcpServers["caveman-shrink"] to change the upstream,`);
-    note('    or `claude mcp remove caveman-shrink` to drop it.');
-    note(`    Docs: https://github.com/${REPO}/tree/main/src/mcp-servers/caveman-shrink`);
+    note(`    Edit ~/.claude.json mcpServers["ieee-paper-mcp"] to change the upstream,`);
+    note('    or `claude mcp remove ieee-paper-mcp` to drop it.');
     return { kind: 'ok' };
   }
   return { kind: 'fail', why: 'claude mcp add failed' };
@@ -956,7 +897,7 @@ function installMcpShrink(ctx) {
 // ── Init writers (per-repo rule files) ────────────────────────────────────
 async function runInit(ctx) {
   const { note, warn, opts, repoRoot } = ctx;
-  const local = repoRoot && path.join(repoRoot, 'src/tools/caveman-init.js');
+  const local = repoRoot && path.join(repoRoot, 'src/tools/ieee-paper-init.js');
   const args = [process.cwd()];
   if (opts.dryRun) args.push('--dry-run');
   if (opts.force)  args.push('--force');
@@ -970,7 +911,7 @@ async function runInit(ctx) {
     return true;
   }
   try {
-    const tmp = path.join(os.tmpdir(), `caveman-init-${process.pid}.js`);
+    const tmp = path.join(os.tmpdir(), `ieee-paper-init-${process.pid}.js`);
     await downloadTo(INIT_SCRIPT_URL, tmp);
     const r = child_process.spawnSync(absoluteNodePath(), [tmp, ...args], { stdio: 'inherit' });
     try { fs.unlinkSync(tmp); } catch (_) {}
@@ -1019,7 +960,7 @@ function sha256File(p) {
 // the standard `sha256sum` text format: "<64-hex>  <path>" (two spaces, or
 // " *<path>" binary marker).
 async function loadRemoteHookChecksums() {
-  const tmp = path.join(os.tmpdir(), `caveman-checksums-${process.pid}-${Date.now()}.sha256`);
+  const tmp = path.join(os.tmpdir(), `ieee-paper-checksums-${process.pid}-${Date.now()}.sha256`);
   try {
     await downloadTo(`${HOOKS_REMOTE}/checksums.sha256`, tmp);
     const txt = fs.readFileSync(tmp, 'utf8');
@@ -1049,12 +990,7 @@ function uninstall(ctx) {
   if (fs.existsSync(settingsPath)) {
     const settings = SETTINGS.readSettings(settingsPath);
     if (settings) {
-      const removed = SETTINGS.removeCavemanHooks(settings, 'caveman');
-      // Drop our statusline if it points at our script
-      if (settings.statusLine) {
-        const cmd = typeof settings.statusLine === 'string' ? settings.statusLine : (settings.statusLine.command || '');
-        if (cmd.includes('caveman-statusline')) delete settings.statusLine;
-      }
+      const removed = SETTINGS.removeIeeePaperWriterHooks(settings, 'ieee-paper');
       SETTINGS.validateHookFields(settings);
       if (!opts.dryRun) SETTINGS.writeSettings(settingsPath, settings);
       ok(`  removed ${removed} ieee-paper-writer hook entr${removed === 1 ? 'y' : 'ies'} from settings.json`);
@@ -1083,11 +1019,11 @@ function uninstall(ctx) {
       note('  claude plugin not installed — skipping');
     }
 
-    // caveman-shrink MCP — only run if `claude mcp` subcommand exists. Tolerate
+    // ieee-paper-mcp MCP — only run if `claude mcp` subcommand exists. Tolerate
     // non-zero exit (server may have never been registered).
     const mcpHelp = captureSpawn('claude', ['mcp', '--help']);
     if (mcpHelp.status === 0) {
-      runSpawn('claude', ['mcp', 'remove', 'caveman-shrink'], null, opts.dryRun);
+      runSpawn('claude', ['mcp', 'remove', 'ieee-paper-mcp'], null, opts.dryRun);
     }
   }
 
@@ -1095,7 +1031,7 @@ function uninstall(ctx) {
   if (hasCmd('gemini')) {
     const probe = captureSpawn('gemini', ['extensions', 'list']);
     if (probe.status === 0 && /ieee-paper-writer/i.test(probe.stdout || '')) {
-      runSpawn('gemini', ['extensions', 'uninstall', 'caveman'], null, opts.dryRun);
+      runSpawn('gemini', ['extensions', 'uninstall', 'ieee-paper-writer'], null, opts.dryRun);
     } else {
       note('  gemini extension not installed — skipping');
     }
@@ -1104,7 +1040,7 @@ function uninstall(ctx) {
   // opencode native install — strip plugin entry, MCP entry, and our files.
   // Probed by the existence of the plugin dir we own; if absent, skip silently.
   const ocDir = opencodeConfigDir();
-  const ocPluginDir = path.join(ocDir, 'plugins', 'caveman');
+  const ocPluginDir = path.join(ocDir, 'plugins', 'ieee-paper-writer');
   if (fs.existsSync(ocPluginDir)) {
     const ocJson = path.join(ocDir, 'opencode.json');
     if (fs.existsSync(ocJson)) {
@@ -1114,8 +1050,8 @@ function uninstall(ctx) {
           cfg.plugin = cfg.plugin.filter(p => p !== OPENCODE_PLUGIN_REL);
           if (cfg.plugin.length === 0) delete cfg.plugin;
         }
-        if (cfg.mcp && typeof cfg.mcp === 'object' && cfg.mcp['caveman-shrink']) {
-          delete cfg.mcp['caveman-shrink'];
+        if (cfg.mcp && typeof cfg.mcp === 'object' && cfg.mcp['ieee-paper-mcp']) {
+          delete cfg.mcp['ieee-paper-mcp'];
           if (Object.keys(cfg.mcp).length === 0) delete cfg.mcp;
         }
         if (!opts.dryRun) SETTINGS.writeSettings(ocJson, cfg);
@@ -1170,15 +1106,13 @@ function uninstall(ctx) {
         }
       }
     }
-    // opencode flag file
-    const ocFlag = path.join(ocDir, '.caveman-active');
-    if (fs.existsSync(ocFlag) && !opts.dryRun) { try { fs.unlinkSync(ocFlag); } catch (_) {} }
+    // no flag file to clean up (ieee-paper-writer is always-on, not toggled)
   }
 
   // OpenClaw native install — strip skill folder + SOUL.md marker block.
   // Probed by the skill folder we own; if absent, skip silently.
   const ocwWs = process.env.OPENCLAW_WORKSPACE || path.join(os.homedir(), '.openclaw', 'workspace');
-  if (fs.existsSync(path.join(ocwWs, 'skills', 'caveman')) || fs.existsSync(path.join(ocwWs, 'SOUL.md'))) {
+  if (fs.existsSync(path.join(ocwWs, 'skills', 'ieee-paper-writer')) || fs.existsSync(path.join(ocwWs, 'SOUL.md'))) {
     const log = {
       write: (s) => process.stdout.write(s),
       note: (s) => note(s),
@@ -1187,10 +1121,6 @@ function uninstall(ctx) {
     const r = OPENCLAW.uninstallOpenclaw({ workspace: ocwWs, dryRun: opts.dryRun, log });
     if (r.touched) ok('  pruned ieee-paper-writer entries from OpenClaw workspace');
   }
-
-  // Flag file
-  const flag = path.join(configDir, '.caveman-active');
-  if (fs.existsSync(flag) && !opts.dryRun) { try { fs.unlinkSync(flag); } catch (_) {} }
 
   process.stdout.write('\n');
   ok('uninstall done.');
@@ -1258,10 +1188,9 @@ FLAGS
   --no-hooks            Skip the hooks installer.
   --with-init           Write per-repo IDE rule files into \$PWD.
   --with-mcp-shrink="<upstream cmd>"
-                        Claude Code (and opencode): register caveman-shrink MCP
-                        proxy wrapping the given upstream. Default OFF.
-                        caveman-shrink crashes without an upstream, so a value
-                        is required. The value is whitespace-tokenized.
+                        Claude Code (and opencode): register an MCP proxy
+                        wrapping the given upstream. Default OFF.
+                        The value is whitespace-tokenized.
                         Example: --with-mcp-shrink="npx @modelcontextprotocol/server-filesystem /tmp"
   --no-mcp-shrink       Skip MCP shrink. (Default.)
   --uninstall, -u       Remove ieee-paper-writer from this machine.
@@ -1360,8 +1289,8 @@ async function main() {
   // Per-repo init
   if (opts.withInit) {
     ctx.say(`→ writing per-repo IDE rule files into ${process.cwd()} (--with-init)`);
-    if (await runInit(ctx)) ctx.results.installed.push(`caveman-init (${process.cwd()})`);
-    else                    ctx.results.failed.push(['caveman-init', 'src/tools/caveman-init.js failed']);
+    if (await runInit(ctx)) ctx.results.installed.push(`ieee-paper-init (${process.cwd()})`);
+    else                    ctx.results.failed.push(['ieee-paper-init', 'src/tools/ieee-paper-init.js failed']);
     process.stdout.write('\n');
   } else if (ctx.results.installed.length || ctx.results.skipped.length) {
     ctx.note('  tip: re-run inside a repo with --all (or --with-init) to also write per-repo');
@@ -1370,7 +1299,7 @@ async function main() {
 
   // Summary
   process.stdout.write('\n');
-  ctx.say('🪨 done');
+  ctx.say('done');
   if (ctx.results.installed.length) {
     ctx.ok('  installed:');
     for (const a of ctx.results.installed) process.stdout.write(`    • ${a}\n`);

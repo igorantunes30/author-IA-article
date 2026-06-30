@@ -99,42 +99,42 @@ test('validateHookFields drops empty events and empty hooks parent', () => {
 
 test('addCommandHook is idempotent on substring marker', () => {
   const s = {};
-  const a = SETTINGS.addCommandHook(s, 'SessionStart', { command: '/abs/path/caveman-activate.js', marker: 'caveman-activate' });
-  const b = SETTINGS.addCommandHook(s, 'SessionStart', { command: '/different/abs/path/caveman-activate.js', marker: 'caveman-activate' });
+  const a = SETTINGS.addCommandHook(s, 'SessionStart', { command: '/abs/path/ieee-paper-activate.js', marker: 'ieee-paper-activate' });
+  const b = SETTINGS.addCommandHook(s, 'SessionStart', { command: '/different/abs/path/ieee-paper-activate.js', marker: 'ieee-paper-activate' });
   assert.equal(a, true);
   assert.equal(b, false);
   assert.equal(s.hooks.SessionStart.length, 1);
 });
 
-test('hasCavemanHook detects via substring', () => {
-  const s = { hooks: { SessionStart: [{ hooks: [{ type: 'command', command: 'node /x/caveman-activate.js' }] }] } };
-  assert.equal(SETTINGS.hasCavemanHook(s, 'SessionStart', 'caveman-activate'), true);
-  assert.equal(SETTINGS.hasCavemanHook(s, 'SessionStart', 'gsd'), false);
-  assert.equal(SETTINGS.hasCavemanHook(s, 'UserPromptSubmit'), false);
+test('hasIeeePaperWriterHook detects via substring', () => {
+  const s = { hooks: { SessionStart: [{ hooks: [{ type: 'command', command: 'node /x/ieee-paper-activate.js' }] }] } };
+  assert.equal(SETTINGS.hasIeeePaperWriterHook(s, 'SessionStart', 'ieee-paper-activate'), true);
+  assert.equal(SETTINGS.hasIeeePaperWriterHook(s, 'SessionStart', 'gsd'), false);
+  assert.equal(SETTINGS.hasIeeePaperWriterHook(s, 'UserPromptSubmit'), false);
 });
 
-test('removeCavemanHooks tolerates malformed hook event values without throwing', () => {
+test('removeIeeePaperWriterHooks tolerates malformed hook event values without throwing', () => {
   // Pre-fix bug: settings.hooks.SessionStart = "oops" (string, not array)
   // would crash on .filter(...) inside the filter loop. Fix delegates to
   // validateHookFields first + adds Array.isArray guard.
   const s = { hooks: { SessionStart: "oops", UserPromptSubmit: { not: 'an array either' } } };
   let removed;
-  assert.doesNotThrow(() => { removed = SETTINGS.removeCavemanHooks(s, 'caveman'); });
+  assert.doesNotThrow(() => { removed = SETTINGS.removeIeeePaperWriterHooks(s, 'ieee-paper'); });
   assert.equal(removed, 0);
   assert.equal(s.hooks, undefined);
 });
 
-test('removeCavemanHooks strips by marker and cleans empties', () => {
+test('removeIeeePaperWriterHooks strips by marker and cleans empties', () => {
   const s = {
     hooks: {
       SessionStart: [
-        { hooks: [{ type: 'command', command: 'caveman-x' }] },
+        { hooks: [{ type: 'command', command: 'ieee-paper-x' }] },
         { hooks: [{ type: 'command', command: 'other' }] },
       ],
-      UserPromptSubmit: [{ hooks: [{ type: 'command', command: 'caveman-y' }] }],
+      UserPromptSubmit: [{ hooks: [{ type: 'command', command: 'ieee-paper-y' }] }],
     },
   };
-  const removed = SETTINGS.removeCavemanHooks(s, 'caveman');
+  const removed = SETTINGS.removeIeeePaperWriterHooks(s, 'ieee-paper');
   assert.equal(removed, 2);
   assert.equal(s.hooks.SessionStart.length, 1);
   assert.equal(s.hooks.UserPromptSubmit, undefined);
@@ -144,14 +144,14 @@ test('rewriteLegacyManagedHookCommands rewrites bare-node managed scripts', () =
   const s = {
     hooks: {
       SessionStart: [{ hooks: [
-        { type: 'command', command: 'node /abs/hooks/caveman-activate.js' },
+        { type: 'command', command: 'node /abs/hooks/ieee-paper-activate.js' },
         { type: 'command', command: 'node /abs/hooks/some-user-hook.js' },
       ] }],
     },
   };
   const n = SETTINGS.rewriteLegacyManagedHookCommands(s, '/usr/local/bin/node');
   assert.equal(n, 1);
-  assert.match(s.hooks.SessionStart[0].hooks[0].command, /"\/usr\/local\/bin\/node" "\/abs\/hooks\/caveman-activate\.js"/);
+  assert.match(s.hooks.SessionStart[0].hooks[0].command, /"\/usr\/local\/bin\/node" "\/abs\/hooks\/ieee-paper-activate\.js"/);
   assert.equal(s.hooks.SessionStart[0].hooks[1].command, 'node /abs/hooks/some-user-hook.js');
 });
 
@@ -159,7 +159,7 @@ test('rewriteLegacyManagedHookCommands ignores already-absolute node commands', 
   const s = {
     hooks: {
       SessionStart: [{ hooks: [
-        { type: 'command', command: '"/usr/local/bin/node" "/abs/hooks/caveman-activate.js"' },
+        { type: 'command', command: '"/usr/local/bin/node" "/abs/hooks/ieee-paper-activate.js"' },
       ] }],
     },
   };
@@ -171,7 +171,7 @@ test('pruneOrphanedManagedHooks removes managed hook whose target is missing (ab
   const s = {
     hooks: {
       SessionStart: [{ hooks: [
-        { type: 'command', command: '"/opt/node/bin/node" "/no/such/dir/caveman-activate.js"' },
+        { type: 'command', command: '"/opt/node/bin/node" "/no/such/dir/ieee-paper-activate.js"' },
       ] }],
     },
   };
@@ -184,7 +184,7 @@ test('pruneOrphanedManagedHooks removes orphan bare-node managed hook', () => {
   const s = {
     hooks: {
       UserPromptSubmit: [{ hooks: [
-        { type: 'command', command: 'node /no/such/dir/caveman-mode-tracker.js' },
+        { type: 'command', command: 'node /no/such/dir/ieee-paper-tracker.js' },
       ] }],
     },
   };
@@ -195,7 +195,7 @@ test('pruneOrphanedManagedHooks removes orphan bare-node managed hook', () => {
 
 test('pruneOrphanedManagedHooks keeps managed hook whose target exists', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cm-prune-'));
-  const script = path.join(dir, 'caveman-activate.js');
+  const script = path.join(dir, 'ieee-paper-activate.js');
   fs.writeFileSync(script, '// real');
   const s = {
     hooks: {
@@ -225,11 +225,11 @@ test('pruneOrphanedManagedHooks leaves non-managed hooks alone even if missing',
 
 test('pruneOrphanedManagedHooks resolves relative target against configDir', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cm-prune-rel-'));
-  // hooks/caveman-activate.js intentionally NOT created → missing
+  // hooks/ieee-paper-activate.js intentionally NOT created → missing
   const s = {
     hooks: {
       SessionStart: [{ hooks: [
-        { type: 'command', command: 'node hooks/caveman-activate.js' },
+        { type: 'command', command: 'node hooks/ieee-paper-activate.js' },
       ] }],
     },
   };
@@ -242,8 +242,8 @@ test('pruneOrphanedManagedHooks does NOT match a user script whose name merely c
   const s = {
     hooks: {
       SessionStart: [{ hooks: [
-        // basename is "mycaveman-activate.js" — not an exact managed basename
-        { type: 'command', command: 'node /no/such/dir/mycaveman-activate.js' },
+        // basename is "myieee-paper-activate.js" — not an exact managed basename
+        { type: 'command', command: 'node /no/such/dir/myieee-paper-activate.js' },
       ] }],
     },
   };
@@ -256,7 +256,7 @@ test('pruneOrphanedManagedHooks handles quoted paths containing spaces', () => {
   const s = {
     hooks: {
       SessionStart: [{ hooks: [
-        { type: 'command', command: '"/opt/node/bin/node" "/no such dir/caveman-activate.js"' },
+        { type: 'command', command: '"/opt/node/bin/node" "/no such dir/ieee-paper-activate.js"' },
       ] }],
     },
   };
@@ -267,7 +267,7 @@ test('pruneOrphanedManagedHooks handles quoted paths containing spaces', () => {
 
 test('pruneOrphanedManagedHooks drops orphaned managed statusLine', () => {
   const s = {
-    statusLine: { type: 'command', command: 'bash /no/such/dir/caveman-statusline.sh' },
+    statusLine: { type: 'command', command: 'bash /no/such/dir/ieee-paper-statusline.sh' },
   };
   const removed = SETTINGS.pruneOrphanedManagedHooks(s, '/tmp/__cm_cfg_missing');
   assert.equal(removed, 1);
