@@ -1,20 +1,20 @@
 ---
 name: Bug report
-about: Caveman speak wrong or break
+about: Report incorrect manuscript output or pipeline failure
 labels: bug
 ---
 
-**What happen**
-<!-- What caveman do wrong -->
+**What happened**
+<!-- What the agent did wrong -->
 
 **Expected**
-<!-- What caveman should do -->
+<!-- What the agent should have produced -->
 
 **Before/after example**
 ```
-Input: [your prompt]
-Got:   [what caveman said]
-Want:  [what caveman should say]
+Input: [your prompt or draft]
+Got:   [what the agent produced]
+Want:  [what it should have produced]
 ```
 
 **Platform**

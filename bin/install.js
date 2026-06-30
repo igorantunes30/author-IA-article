@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// caveman — unified cross-platform installer.
+// ieee-paper-writer — unified cross-platform installer.
 //
 // One Node script replaces the old install.sh + install.ps1 + src/hooks/install.sh
 // + src/hooks/install.ps1 quartet. Single source of truth. Works on macOS, Linux,
@@ -8,7 +8,7 @@
 //
 // Distribution:
 //   Local clone: node bin/install.js [flags]
-//   curl|bash:   delegated from install.sh shim → npx -y github:JuliusBrussee/caveman -- [flags]
+//   curl|bash:   delegated from install.sh shim → npx -y github:igorantunes30/author-IA-article -- [flags]
 //   Windows:     pwsh install.ps1 [flags] → same npx delegation
 //
 // Pure stdlib, zero npm runtime deps.
@@ -26,14 +26,14 @@ const SETTINGS = require('./lib/settings');
 const OPENCLAW = require('./lib/openclaw');
 const { stripOpencodeAgentTools } = require('./lib/opencode-agent');
 
-const REPO = 'JuliusBrussee/caveman';
+const REPO = 'igorantunes30/author-IA-article';
 // Pin remote fetches to an immutable release tag, not the moving `main`
 // branch (issue #261). A push to main must never silently change what a
 // curl|bash / detached-script install downloads and executes. Bump this to
 // the new tag on every release (CI release step) AFTER regenerating
 // src/hooks/checksums.sha256 so the integrity manifest matches the ref.
 // Overridable via CAVEMAN_REF for testing against a branch.
-const PINNED_REF = process.env.CAVEMAN_REF || 'v1.9.0';
+const PINNED_REF = process.env.PAPER_WRITER_REF || 'v1.9.0';
 const RAW_BASE = `https://raw.githubusercontent.com/${REPO}/${PINNED_REF}`;
 const HOOKS_REMOTE = `${RAW_BASE}/src/hooks`;
 const INIT_SCRIPT_URL = `${RAW_BASE}/src/tools/caveman-init.js`;
@@ -125,7 +125,7 @@ function parseArgs(argv) {
         break;
       }
       default:
-        die(`error: unknown flag: ${a}\nrun 'caveman --help' for usage`);
+        die(`error: unknown flag: ${a}\nrun 'node bin/install.js --help' for usage`);
     }
   }
   if (opts.all && opts.minimal) die('error: --all and --minimal are mutually exclusive');
@@ -144,7 +144,7 @@ function parseArgs(argv) {
     const knownIds = new Set(PROVIDERS.map(p => p.id));
     for (const id of opts.only) {
       if (!knownIds.has(id)) {
-        die(`error: unknown agent: ${id}\n  see 'caveman --list' for valid ids`);
+        die(`error: unknown agent: ${id}\n  see 'node bin/install.js --list' for valid ids`);
       }
     }
   }
@@ -169,14 +169,14 @@ function checkWslWindowsNode() {
   // Windows-Node executing inside WSL has homedir like /mnt/c/Users/... which
   // breaks every config-dir resolution. Detect and abort with a clear hint.
   if (process.env.WSL_DISTRO_NAME) {
-    die('caveman: detected Windows Node.js running inside WSL.\n' +
+    die('ieee-paper-writer: detected Windows Node.js running inside WSL.\n' +
         '         Install Linux-native Node inside your WSL distro and re-run there.\n' +
         '         (WSL_DISTRO_NAME=' + process.env.WSL_DISTRO_NAME + ')');
   }
   try {
     const v = fs.readFileSync('/proc/version', 'utf8').toLowerCase();
     if (v.includes('microsoft') || v.includes('wsl')) {
-      die('caveman: detected Windows Node.js running inside WSL (/proc/version).\n' +
+      die('ieee-paper-writer: detected Windows Node.js running inside WSL (/proc/version).\n' +
           '         Install Linux-native Node inside your WSL distro and re-run there.');
     }
   } catch (_) { /* /proc/version absent on real Windows — fine */ }
@@ -184,7 +184,7 @@ function checkWslWindowsNode() {
 
 function checkNodeVersion() {
   const major = parseInt(process.versions.node.split('.')[0], 10);
-  if (major < 18) die(`caveman: Node ${process.versions.node} too old. Need Node ≥18. https://nodejs.org`);
+  if (major < 18) die(`ieee-paper-writer: Node ${process.versions.node} too old. Need Node ≥18. https://nodejs.org`);
 }
 
 // ── Provider matrix ────────────────────────────────────────────────────────
@@ -432,16 +432,16 @@ async function installClaude(ctx) {
   let alreadyInstalled = false;
   if (!opts.force) {
     const r = captureSpawn('claude', ['plugin', 'list']);
-    if (r.status === 0 && /caveman/i.test(r.stdout || '')) alreadyInstalled = true;
+    if (r.status === 0 && /ieee-paper-writer/i.test(r.stdout || '')) alreadyInstalled = true;
   }
   let pluginInstallSucceeded = false;
   if (alreadyInstalled) {
-    note('  caveman plugin already installed (use --force to reinstall)');
+    note('  ieee-paper-writer plugin already installed (use --force to reinstall)');
     results.skipped.push(['claude', 'plugin already installed']);
     pluginInstallSucceeded = true;
   } else {
     const r1 = runSpawn('claude', ['plugin', 'marketplace', 'add', REPO], null, opts.dryRun);
-    const r2 = runSpawn('claude', ['plugin', 'install', 'caveman@caveman'], null, opts.dryRun);
+    const r2 = runSpawn('claude', ['plugin', 'install', 'ieee-paper-writer@ieee-paper-writer'], null, opts.dryRun);
     if ((r1.status || 0) === 0 && (r2.status || 0) === 0) {
       results.installed.push('claude');
       pluginInstallSucceeded = true;
@@ -463,7 +463,7 @@ async function installClaude(ctx) {
     if (settings) {
       const pruned = SETTINGS.pruneOrphanedManagedHooks(settings, configDir);
       if (pruned > 0) {
-        note(`  removed ${pruned} orphaned caveman hook entr${pruned === 1 ? 'y' : 'ies'} from settings.json (target script missing)`);
+        note(`  removed ${pruned} orphaned ieee-paper-writer hook entr${pruned === 1 ? 'y' : 'ies'} from settings.json (target script missing)`);
         if (!opts.dryRun) {
           SETTINGS.validateHookFields(settings);
           SETTINGS.writeSettings(settingsPath, settings);
@@ -526,8 +526,8 @@ function installGemini(ctx) {
 
   if (!opts.force) {
     const r = captureSpawn('gemini', ['extensions', 'list']);
-    if (r.status === 0 && /caveman/i.test(r.stdout || '')) {
-      note('  caveman extension already installed (use --force to reinstall)');
+    if (r.status === 0 && /ieee-paper-writer/i.test(r.stdout || '')) {
+      note('  ieee-paper-writer extension already installed (use --force to reinstall)');
       results.skipped.push(['gemini', 'extension already installed']);
       process.stdout.write('\n');
       return;
@@ -569,8 +569,8 @@ function installViaSkills(ctx, prov) {
 const OPENCODE_SKILL_DIRS  = ['caveman', 'caveman-commit', 'caveman-review', 'caveman-help', 'caveman-stats', 'caveman-compress', 'cavecrew'];
 const OPENCODE_AGENT_FILES = ['cavecrew-investigator.md', 'cavecrew-builder.md', 'cavecrew-reviewer.md'];
 const OPENCODE_COMMAND_FILES = ['caveman.md', 'caveman-commit.md', 'caveman-review.md', 'caveman-compress.md', 'caveman-stats.md', 'caveman-help.md'];
-const OPENCODE_PLUGIN_REL = './plugins/caveman/plugin.js';
-const OPENCODE_AGENTS_MD_SENTINEL = 'Respond terse like smart caveman';
+const OPENCODE_PLUGIN_REL = './plugins/ieee-paper-writer/plugin.js';
+const OPENCODE_AGENTS_MD_SENTINEL = 'ieee-paper-writer pipeline';
 // Marker fence for the opencode AGENTS.md ruleset block. Same convention as
 // bin/lib/openclaw.js for SOUL.md — lets us strip our block cleanly even when
 // the user has authored content above AND below it.
@@ -600,8 +600,8 @@ function installOpencode(ctx) {
   say('→ opencode detected');
 
   if (!repoRoot) {
-    warn('  opencode native install requires a local clone of the caveman repo.');
-    note('  Re-run from a clone: git clone https://github.com/' + REPO + ' && cd caveman && node bin/install.js --only opencode');
+    warn('  opencode native install requires a local clone of the ieee-paper-writer repo.');
+    note('  Re-run from a clone: git clone https://github.com/' + REPO + ' && cd author-IA-article && node bin/install.js --only opencode');
     results.failed.push(['opencode', 'native install requires local repo clone']);
     process.stdout.write('\n');
     return;
@@ -703,21 +703,21 @@ function installOpencode(ctx) {
         && existing.includes(OPENCODE_AGENTS_MD_END);
       const alreadyByLegacySentinel = !alreadyFenced && existing.includes(OPENCODE_AGENTS_MD_SENTINEL);
       if (alreadyFenced) {
-        note(`  ${agentsMd} already contains caveman ruleset`);
+        note(`  ${agentsMd} already contains ieee-paper-writer ruleset`);
       } else if (alreadyByLegacySentinel) {
-        note(`  ${agentsMd} contains a legacy (un-fenced) caveman block — leaving as-is`);
+        note(`  ${agentsMd} contains a legacy (un-fenced) ieee-paper-writer block — leaving as-is`);
         note('  re-run with --force to replace it with a fenced block');
         if (opts.force) {
           // Replace the entire file with a clean fenced version. The legacy
           // path didn't fence, so we can't isolate the block — full rewrite is
           // the only safe option under --force.
           fs.writeFileSync(agentsMd, fencedBlock, { mode: 0o644 });
-          process.stdout.write(`  rewrote ${agentsMd} with fenced caveman block\n`);
+          process.stdout.write(`  rewrote ${agentsMd} with fenced ieee-paper-writer block\n`);
         }
       } else {
         const sep = existing.endsWith('\n\n') ? '' : (existing.endsWith('\n') ? '\n' : '\n\n');
         fs.writeFileSync(agentsMd, existing + sep + fencedBlock, { mode: 0o644 });
-        process.stdout.write(`  appended caveman ruleset to ${agentsMd}\n`);
+        process.stdout.write(`  appended ieee-paper-writer ruleset to ${agentsMd}\n`);
       }
     } else {
       fs.writeFileSync(agentsMd, fencedBlock, { mode: 0o644 });
@@ -768,10 +768,10 @@ function installOpencode(ctx) {
 }
 
 // ── OpenClaw native install ───────────────────────────────────────────────
-// Drops skills/caveman/ into the OpenClaw workspace and appends a small
+// Drops skills/ieee-paper-writer/ into the OpenClaw workspace and appends a small
 // auto-injected bootstrap block to the workspace SOUL.md. Always-on behavior
 // comes from SOUL.md (auto-injected each turn); the skill folder makes
-// caveman discoverable via `openclaw skills list`. See bin/lib/openclaw.js
+// ieee-paper-writer discoverable via `openclaw skills list`. See bin/lib/openclaw.js
 // for the actual file writes.
 function installOpenclaw(ctx) {
   const { say, note, warn, opts, repoRoot, results } = ctx;
@@ -875,14 +875,14 @@ async function installHooks(ctx) {
     command: `"${node}" "${activate}"`,
     marker: 'caveman-activate',
     timeout: 5,
-    statusMessage: 'Loading caveman mode...',
+    statusMessage: 'Loading ieee-paper-writer...',
   });
 
   SETTINGS.addCommandHook(settings, 'UserPromptSubmit', {
     command: `"${node}" "${tracker}"`,
     marker: 'caveman-mode-tracker',
     timeout: 5,
-    statusMessage: 'Tracking caveman mode...',
+    statusMessage: 'Tracking ieee-paper-writer mode...',
   });
 
   // Statusline — set if absent or already pointing at our script.
@@ -903,7 +903,7 @@ async function installHooks(ctx) {
     if (existing.includes(statusline) || existing.includes('caveman-statusline')) {
       process.stdout.write('  statusline badge already configured.\n');
     } else {
-      process.stdout.write('  NOTE: existing statusline detected — caveman badge NOT added.\n');
+      process.stdout.write('  NOTE: existing statusline detected — ieee-paper-writer badge NOT added.\n');
       process.stdout.write('        See src/hooks/README.md to add the badge to your existing statusline.\n');
     }
   }
@@ -1039,7 +1039,7 @@ async function loadRemoteHookChecksums() {
 // ── Uninstall ─────────────────────────────────────────────────────────────
 function uninstall(ctx) {
   const { say, note, warn, ok, opts, configDir } = ctx;
-  say('🪨 caveman uninstall');
+  say('ieee-paper-writer uninstall');
 
   if (opts.dryRun) note('  (dry run — nothing will be removed)');
 
@@ -1057,7 +1057,7 @@ function uninstall(ctx) {
       }
       SETTINGS.validateHookFields(settings);
       if (!opts.dryRun) SETTINGS.writeSettings(settingsPath, settings);
-      ok(`  removed ${removed} caveman hook entr${removed === 1 ? 'y' : 'ies'} from settings.json`);
+      ok(`  removed ${removed} ieee-paper-writer hook entr${removed === 1 ? 'y' : 'ies'} from settings.json`);
     }
   }
 
@@ -1072,12 +1072,12 @@ function uninstall(ctx) {
   }
 
   // Plugin uninstall on Claude. Probe `plugin list` first so a re-run on a
-  // machine where caveman was never installed (or was already removed) doesn't
+  // machine where ieee-paper-writer was never installed (or was already removed) doesn't
   // print "Plugin not installed" stderr noise.
   if (hasCmd('claude')) {
     const probe = captureSpawn('claude', ['plugin', 'list']);
-    if (probe.status === 0 && /caveman/i.test(probe.stdout || '')) {
-      const r = runSpawn('claude', ['plugin', 'uninstall', 'caveman@caveman'], null, opts.dryRun);
+    if (probe.status === 0 && /ieee-paper-writer/i.test(probe.stdout || '')) {
+      const r = runSpawn('claude', ['plugin', 'uninstall', 'ieee-paper-writer@ieee-paper-writer'], null, opts.dryRun);
       if ((r.status || 0) === 0) ok('  removed claude plugin');
     } else {
       note('  claude plugin not installed — skipping');
@@ -1094,7 +1094,7 @@ function uninstall(ctx) {
   // Gemini extension. Same idempotency probe as claude.
   if (hasCmd('gemini')) {
     const probe = captureSpawn('gemini', ['extensions', 'list']);
-    if (probe.status === 0 && /caveman/i.test(probe.stdout || '')) {
+    if (probe.status === 0 && /ieee-paper-writer/i.test(probe.stdout || '')) {
       runSpawn('gemini', ['extensions', 'uninstall', 'caveman'], null, opts.dryRun);
     } else {
       note('  gemini extension not installed — skipping');
@@ -1119,7 +1119,7 @@ function uninstall(ctx) {
           if (Object.keys(cfg.mcp).length === 0) delete cfg.mcp;
         }
         if (!opts.dryRun) SETTINGS.writeSettings(ocJson, cfg);
-        ok(`  pruned caveman entries from ${ocJson}`);
+        ok(`  pruned ieee-paper-writer entries from ${ocJson}`);
       }
     }
     if (!opts.dryRun) { try { fs.rmSync(ocPluginDir, { recursive: true, force: true }); } catch (_) {} }
@@ -1138,7 +1138,7 @@ function uninstall(ctx) {
       const p = path.join(ocDir, 'skills', name);
       if (fs.existsSync(p) && !opts.dryRun) { try { fs.rmSync(p, { recursive: true, force: true }); } catch (_) {} }
     }
-    // AGENTS.md — strip the fenced caveman block (preserves user content
+    // AGENTS.md — strip the fenced ieee-paper-writer block (preserves user content
     // above and below). If the file is empty after the strip, remove it.
     // Falls back to legacy unfenced-sentinel handling for installs that
     // pre-date the marker fence.
@@ -1159,14 +1159,14 @@ function uninstall(ctx) {
             fs.writeFileSync(ocAgentsMd, next, { mode: 0o644 });
           }
         }
-        note(next === '' ? `  removed ${ocAgentsMd}` : `  stripped caveman block from ${ocAgentsMd}`);
+        note(next === '' ? `  removed ${ocAgentsMd}` : `  stripped ieee-paper-writer block from ${ocAgentsMd}`);
       } else if (body.includes(OPENCODE_AGENTS_MD_SENTINEL)) {
         // Legacy install (no marker fence). Remove only if the file is ours.
         if (body.trim() === '' || body.trim().startsWith(OPENCODE_AGENTS_MD_SENTINEL)) {
           if (!opts.dryRun) { try { fs.unlinkSync(ocAgentsMd); } catch (_) {} }
           note(`  removed ${ocAgentsMd}`);
         } else {
-          note(`  left ${ocAgentsMd} in place (legacy mixed content — strip caveman block manually)`);
+          note(`  left ${ocAgentsMd} in place (legacy mixed content — strip ieee-paper-writer block manually)`);
         }
       }
     }
@@ -1185,7 +1185,7 @@ function uninstall(ctx) {
       warn: (s) => warn(s),
     };
     const r = OPENCLAW.uninstallOpenclaw({ workspace: ocwWs, dryRun: opts.dryRun, log });
-    if (r.touched) ok('  pruned caveman entries from OpenClaw workspace');
+    if (r.touched) ok('  pruned ieee-paper-writer entries from OpenClaw workspace');
   }
 
   // Flag file
@@ -1219,7 +1219,7 @@ async function promptForOnly(detected) {
 // ── --list ─────────────────────────────────────────────────────────────────
 function printList(noColor) {
   const c = makeChalk(noColor);
-  process.stdout.write(c.orange('🪨 caveman provider matrix') + '\n\n');
+  process.stdout.write(c.orange('ieee-paper-writer provider matrix') + '\n\n');
   process.stdout.write(`  ${pad('ID', 13)} ${pad('AGENT', 22)} INSTALL MECHANISM\n`);
   process.stdout.write(`  ${pad('--', 13)} ${pad('-----', 22)} -----------------\n`);
   for (const p of PROVIDERS) {
@@ -1236,10 +1236,10 @@ function pad(s, n) { s = String(s); return s + ' '.repeat(Math.max(0, n - s.leng
 
 // ── Help ───────────────────────────────────────────────────────────────────
 function printHelp() {
-  process.stdout.write(`caveman installer — detects your agents and installs caveman for each one.
+  process.stdout.write(`ieee-paper-writer installer — detects your agents and installs ieee-paper-writer for each one.
 
 USAGE
-  npx -y github:JuliusBrussee/caveman -- [flags]
+  npx -y github:igorantunes30/author-IA-article -- [flags]
   node bin/install.js [flags]
   bash install.sh [flags]              # shim → npx
   pwsh install.ps1 [flags]             # shim → npx
@@ -1264,7 +1264,7 @@ FLAGS
                         is required. The value is whitespace-tokenized.
                         Example: --with-mcp-shrink="npx @modelcontextprotocol/server-filesystem /tmp"
   --no-mcp-shrink       Skip MCP shrink. (Default.)
-  --uninstall, -u       Remove caveman from this machine.
+  --uninstall, -u       Remove ieee-paper-writer from this machine.
   --config-dir <path>   Claude Code config dir for hook files + settings.json.
                         Default: \$CLAUDE_CONFIG_DIR or ~/.claude. Does NOT
                         scope \`claude plugin install\`, \`gemini extensions
@@ -1276,10 +1276,10 @@ FLAGS
   -h, --help            Show this help.
 
 EXAMPLES
-  npx -y github:JuliusBrussee/caveman                        # default install
-  npx -y github:JuliusBrussee/caveman -- --all               # all the trimmings
-  npx -y github:JuliusBrussee/caveman -- --only claude --no-mcp-shrink
-  npx -y github:JuliusBrussee/caveman -- --uninstall
+  npx -y github:igorantunes30/author-IA-article                        # default install
+  npx -y github:igorantunes30/author-IA-article -- --all               # all the trimmings
+  npx -y github:igorantunes30/author-IA-article -- --only claude --no-mcp-shrink
+  npx -y github:igorantunes30/author-IA-article -- --uninstall
 
   Issues: https://github.com/${REPO}/issues
 `);
@@ -1309,7 +1309,7 @@ async function main() {
 
   if (opts.uninstall) { uninstall(ctx); return 0; }
 
-  ctx.say('🪨 caveman installer');
+  ctx.say('ieee-paper-writer installer');
   ctx.note(`  ${REPO}`);
   if (opts.dryRun) ctx.note('  (dry run — nothing will be written)');
   process.stdout.write('\n');
@@ -1388,7 +1388,7 @@ async function main() {
     process.stdout.write('  or pass --only <agent> to force a specific target.\n');
   }
   process.stdout.write('\n');
-  ctx.note("  start any session and say 'caveman mode', or run /caveman in Claude Code");
+  ctx.note("  start any session and type /ieee-paper-writer in Claude Code");
   ctx.note(`  uninstall: npx -y github:${REPO} -- --uninstall`);
 
   // Exit code: nonzero only if every detected agent failed
