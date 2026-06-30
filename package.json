@@ -1,0 +1,35 @@
+{
+  "name": "ieee-paper-writer",
+  "version": "1.0.0",
+  "description": "IEEE Paper Writer — scientific manuscript writing and review skill for Claude Code. Four-agent pipeline: Author, Editorial, IEEE Style, Reviewer.",
+  "license": "MIT",
+  "author": "Ivan Igor Antunes Neves <ivan.neves@itec.ufpa.br>",
+  "homepage": "https://github.com/ivan-neves/ieee-paper-writer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ivan-neves/ieee-paper-writer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ivan-neves/ieee-paper-writer/issues"
+  },
+  "bin": {
+    "ieee-paper": "./bin/install.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test tests/installer/*.test.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "agents/",
+    "skills/",
+    "plugins/",
+    "commands/",
+    "dist/author.skill",
+    "README.md",
+    "LICENSE"
+  ]
+}

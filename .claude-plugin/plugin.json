@@ -1,0 +1,35 @@
+{
+  "name": "ieee-paper-writer",
+  "description": "Scientific manuscript writing and review for Claude Code. Four-agent pipeline producing peer-review-quality output for IEEE, Elsevier, Springer, ACM, and Nature Portfolio journals.",
+  "author": {
+    "name": "Ivan Igor Antunes Neves",
+    "url": "https://github.com/ivan-neves",
+    "email": "ivan.neves@itec.ufpa.br"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/src/hooks/ieee-paper-activate.js\"",
+            "timeout": 5,
+            "statusMessage": "Loading ieee-paper-writer..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/src/hooks/ieee-paper-tracker.js\"",
+            "timeout": 5,
+            "statusMessage": "Checking for paper-writing triggers..."
+          }
+        ]
+      }
+    ]
+  }
+}
