@@ -1,14 +1,11 @@
-name: Sync SKILL.md and rules
+name: Sync SKILL.md and agents
 
 on:
   push:
     branches: [main]
     paths:
-      - skills/caveman/SKILL.md
-      - skills/cavecrew/SKILL.md
-      - agents/cavecrew-*.md
-      - skills/caveman-compress/SKILL.md
-      - skills/caveman-compress/scripts/**
+      - skills/ieee-paper-writer/SKILL.md
+      - agents/ieee-paper-*.md
 
 concurrency:
   group: sync-skill
@@ -30,41 +27,31 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main
 
-      - name: Sync SKILL.md copies
+      - name: Sync ieee-paper-writer SKILL.md to plugin
         run: |
-          cp skills/caveman/SKILL.md plugins/caveman/skills/caveman/SKILL.md
+          mkdir -p plugins/ieee-paper-writer/skills/ieee-paper-writer
+          cp skills/ieee-paper-writer/SKILL.md plugins/ieee-paper-writer/skills/ieee-paper-writer/SKILL.md
 
-      - name: Sync caveman-compress skill to plugin
+      - name: Sync pipeline agents to plugin
         run: |
-          # Plugin distribution mirrors source verbatim — no rename, no sed.
-          mkdir -p plugins/caveman/skills/caveman-compress
-          cp skills/caveman-compress/SKILL.md plugins/caveman/skills/caveman-compress/SKILL.md
-          rm -rf plugins/caveman/skills/caveman-compress/scripts
-          cp -r skills/caveman-compress/scripts plugins/caveman/skills/caveman-compress/scripts
-          rm -rf plugins/caveman/skills/caveman-compress/scripts/__pycache__
+          mkdir -p plugins/ieee-paper-writer/agents
+          cp agents/ieee-paper-author.md    plugins/ieee-paper-writer/agents/ieee-paper-author.md
+          cp agents/ieee-paper-editorial.md plugins/ieee-paper-writer/agents/ieee-paper-editorial.md
+          cp agents/ieee-paper-style.md     plugins/ieee-paper-writer/agents/ieee-paper-style.md
+          cp agents/ieee-paper-reviewer.md  plugins/ieee-paper-writer/agents/ieee-paper-reviewer.md
 
-      - name: Sync cavecrew skill + agents to plugin
-        run: |
-          mkdir -p plugins/caveman/skills/cavecrew plugins/caveman/agents
-          cp skills/cavecrew/SKILL.md plugins/caveman/skills/cavecrew/SKILL.md
-          cp agents/cavecrew-investigator.md plugins/caveman/agents/cavecrew-investigator.md
-          cp agents/cavecrew-builder.md plugins/caveman/agents/cavecrew-builder.md
-          cp agents/cavecrew-reviewer.md plugins/caveman/agents/cavecrew-reviewer.md
-
-      - name: Rebuild caveman.skill ZIP
-        run: mkdir -p dist && cd skills && zip -r ../dist/caveman.skill caveman/
+      - name: Rebuild ieee-paper-writer.skill ZIP
+        run: mkdir -p dist && cd skills && zip -r ../dist/ieee-paper-writer.skill ieee-paper-writer/
 
       - name: Commit and push if changed
         run: |
           git add \
-            skills/caveman-compress/ \
-            plugins/caveman/skills/caveman-compress/ \
-            plugins/caveman/skills/caveman/SKILL.md \
-            plugins/caveman/skills/cavecrew/SKILL.md \
-            plugins/caveman/agents/cavecrew-investigator.md \
-            plugins/caveman/agents/cavecrew-builder.md \
-            plugins/caveman/agents/cavecrew-reviewer.md \
-            dist/caveman.skill
+            plugins/ieee-paper-writer/skills/ieee-paper-writer/SKILL.md \
+            plugins/ieee-paper-writer/agents/ieee-paper-author.md \
+            plugins/ieee-paper-writer/agents/ieee-paper-editorial.md \
+            plugins/ieee-paper-writer/agents/ieee-paper-style.md \
+            plugins/ieee-paper-writer/agents/ieee-paper-reviewer.md \
+            dist/ieee-paper-writer.skill
           git diff --staged --quiet && exit 0
-          git commit -m "chore: sync SKILL.md copies [skip ci]"
+          git commit -m "chore: sync SKILL.md and agents [skip ci]"
           git push
