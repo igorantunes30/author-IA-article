@@ -8,41 +8,41 @@
 <h1 align="center">ieee-paper-writer</h1>
 
 <p align="center">
-  <strong>Notas brutas entram. Manuscrito pronto para revisão por pares sai.</strong>
+  <strong>Raw notes in. Peer-review-ready manuscript out.</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/ivan-neves/ieee-paper-writer/stargazers"><img src="https://img.shields.io/github/stars/ivan-neves/ieee-paper-writer?style=flat&color=blue" alt="Stars"></a>
-  <a href="https://github.com/ivan-neves/ieee-paper-writer/commits/main"><img src="https://img.shields.io/github/last-commit/ivan-neves/ieee-paper-writer?style=flat" alt="Último commit"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/ivan-neves/ieee-paper-writer?style=flat" alt="Licença"></a>
+  <a href="https://github.com/igorantunes30/author-IA-article/stargazers"><img src="https://img.shields.io/github/stars/igorantunes30/author-IA-article?style=flat&color=blue" alt="Stars"></a>
+  <a href="https://github.com/igorantunes30/author-IA-article/commits/main"><img src="https://img.shields.io/github/last-commit/igorantunes30/author-IA-article?style=flat" alt="Last commit"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/igorantunes30/author-IA-article?style=flat" alt="License"></a>
 </p>
 
 <p align="center">
-  <a href="#antes--depois">Antes/Depois</a> •
-  <a href="#instalação">Instalação</a> •
+  <a href="#before--after">Before/After</a> •
+  <a href="#installation">Installation</a> •
   <a href="#pipeline">Pipeline</a> •
-  <a href="#o-que-você-recebe">O que você recebe</a> •
-  <a href="./INSTALL.md">Guia completo de instalação</a>
+  <a href="#what-you-get">What you get</a> •
+  <a href="./INSTALL.md">Full install guide</a>
 </p>
 
 ---
 
-Uma skill/plugin para [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (também Cursor, Windsurf, Cline, Copilot e 30+ agentes) que transforma rascunhos, listas de tópicos ou notas brutas em **manuscritos acadêmicos prontos para revisão por pares**, seguindo os padrões IEEE, Elsevier, Springer, ACM, Nature Portfolio e Qualis A. Quatro agentes especializados. Um comando.
+A skill/plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (also Cursor, Windsurf, Cline, Copilot, and 30+ agents) that transforms drafts, bullet points, or raw notes into **peer-review-ready academic manuscripts**, following IEEE, Elsevier, Springer, ACM, Nature Portfolio, and Qualis A standards. Four specialized agents. One command.
 
-## Antes / Depois
+## Before / After
 
 <table>
 <tr>
 <td width="50%">
 
-### Entrada bruta
+### Raw input
 
-> "propomos um algoritmo distribuído para otimizar redes de sensores. reduz consumo de energia. testamos em 3 topologias. resultados bons. melhor que o baseline."
+> "we propose a distributed algorithm to optimize sensor networks. reduces energy consumption. tested on 3 topologies. good results. better than baseline."
 
 </td>
 <td width="50%">
 
-### Saída do ieee-paper-writer
+### ieee-paper-writer output
 
 > "This paper proposes a distributed optimization algorithm for energy-constrained sensor networks. The proposed approach reduces energy consumption by exploiting local topology information to minimize inter-node communication overhead. Experimental evaluation across three representative network topologies demonstrates a statistically significant improvement over the baseline, with a mean energy reduction of X% (p < 0.05)."
 
@@ -51,14 +51,14 @@ Uma skill/plugin para [Claude Code](https://docs.anthropic.com/en/docs/claude-co
 <tr>
 <td>
 
-### Entrada bruta
+### Raw input
 
-> "o método funciona porque nós só falam com vizinhos. evita coordenação global. mostramos convergência."
+> "the method works because nodes only talk to neighbors. avoids global coordination. we show convergence."
 
 </td>
 <td>
 
-### Saída do ieee-paper-writer
+### ieee-paper-writer output
 
 > "The convergence of the proposed method is guaranteed under mild connectivity assumptions. By restricting information exchange to immediate neighbors, the algorithm eliminates the need for global coordination, thereby reducing communication complexity from O(n²) to O(d), where d denotes the maximum node degree."
 
@@ -66,205 +66,205 @@ Uma skill/plugin para [Claude Code](https://docs.anthropic.com/en/docs/claude-co
 </tr>
 </table>
 
-**Mesmas ideias. Linguagem de publicação. Sempre.**
+**Same ideas. Publication-grade language. Every time.**
 
 ## Pipeline
 
-Quatro agentes em sequência. Cada etapa constrói sobre a anterior.
+Four agents in sequence. Each stage builds on the previous.
 
 ```
-Entrada (notas / rascunho / seção)
+Input (notes / draft / section)
         │
         ▼
 ┌───────────────────┐
-│  Etapa 1: Autor   │  Persona de pesquisador sênior. Escreve draft técnico
-│                   │  completo: estrutura, argumentação, verbos científicos,
-│                   │  lógica de parágrafo. Ciclo completo do artigo suportado.
+│  Stage 1: Author  │  Senior researcher persona. Writes complete technical
+│                   │  draft: structure, argumentation, scientific verbs,
+│                   │  paragraph logic. Full paper lifecycle supported.
 └────────┬──────────┘
          │
          ▼
 ┌────────────────────────┐
-│  Etapa 2: Editorial    │  Especialista em linguística. Refina fluência, ritmo,
-│                        │  variedade sintática, transições, conectores.
-│                        │  NÃO toca no conteúdo técnico.
+│  Stage 2: Editorial    │  Linguistics specialist. Refines fluency, rhythm,
+│                        │  syntactic variety, transitions, connectors.
+│                        │  Does NOT touch scientific content.
 └────────┬───────────────┘
          │
          ▼
 ┌─────────────────────────┐
-│  Etapa 3: Estilo IEEE   │  Aplica convenções IEEE: impessoalidade,
-│                         │  equilíbrio de voz, protocolo de siglas,
-│                         │  construções proibidas, vocabulário de precisão.
+│  Stage 3: IEEE Style    │  Applies IEEE conventions: impersonality,
+│                         │  voice balance, acronym protocol,
+│                         │  forbidden constructions, precision vocabulary.
 └────────┬────────────────┘
          │
          ▼
 ┌──────────────────────────┐
-│  Etapa 4: Revisor        │  Revisor anônimo por pares. Encontra ambiguidades,
-│                          │  afirmações sem suporte, falhas de coerência,
-│                          │  problemas estruturais. Sinaliza o que precisa de ação.
+│  Stage 4: Reviewer       │  Anonymous peer reviewer. Finds ambiguities,
+│                          │  unsupported claims, coherence failures,
+│                          │  structural issues. Flags what needs action.
 └────────┬─────────────────┘
          │
          ▼
-Manuscrito final + Notas de Estilo + Relatório do Revisor
+Final manuscript + Style Notes + Reviewer Report
 ```
 
-**Conteúdo científico é invariante em todas as quatro etapas.** Resultados, hipóteses, equações, valores numéricos, citações — nunca alterados.
+**Scientific content is invariant across all four stages.** Results, hypotheses, equations, numerical values, citations — never altered.
 
-## O que cada etapa faz
+## What each stage does
 
-Cada etapa tem uma responsabilidade distinta e não sobrepõe a anterior.
+Each stage has a distinct responsibility that does not overlap with the previous.
 
 <img src="11.png" width="64" />
 
-### Etapa 1 — Autor
+### Stage 1 — Author
 
-Transforma matéria-prima (notas, bullet points, rascunhos, texto em português) em prosa técnica completa. O agente Autor decide a estrutura de parágrafos, seleciona verbos científicos precisos e atribui uma função clara a cada parágrafo — contextualização, formulação, análise, interpretação, conclusão parcial. Não melhora texto existente; escreve a partir do input bruto. O ciclo completo do artigo é suportado: definição do problema → literatura → lacuna → motivação → proposta → modelo matemático → avaliação → conclusões.
+Transforms raw material (notes, bullet points, drafts, Portuguese text) into complete technical prose. The Author agent decides paragraph structure, selects precise scientific verbs, and assigns a clear function to each paragraph — contextualization, formulation, analysis, interpretation, partial conclusion. It does not polish existing text; it writes from raw input. The full paper lifecycle is supported: problem definition → literature → gap → motivation → proposal → mathematical model → evaluation → conclusions.
 
 <img src="12.png" width="64" />
 
-### Etapa 2 — Editorial
+### Stage 2 — Editorial
 
-Recebe o draft do Autor e melhora apenas a forma linguística — nunca o conteúdo científico. O agente Editorial trabalha o ritmo das sentenças (alternando curta declarativa → média elaborativa → longa complexa), remove conectores automáticos colocados por hábito e não por lógica ("furthermore", "moreover" repetidos), elimina sentenças redundantes que repetem a anterior sem acrescentar informação, e corrige violações de paralelismo em listas e enumerações. Não tem consciência das convenções IEEE — sua única preocupação é prosa acadêmica de alta qualidade.
+Receives the Author draft and improves only linguistic form — never scientific content. The Editorial agent works on sentence rhythm (alternating short declarative → medium elaborating → long complex), removes connectors placed by habit rather than logic (repeated "furthermore", "moreover"), eliminates redundant sentences that restate the previous without adding information, and corrects parallelism violations in lists and enumerations. It has no awareness of IEEE conventions — its sole concern is high-quality academic prose.
 
 <img src="13.png" width="64" />
 
-### Etapa 3 — Estilo IEEE
+### Stage 3 — IEEE Style
 
-Recebe o texto do Editorial e aplica as convenções específicas do IEEE Transactions e IEEE Access. Responsabilidades: substituir construções em primeira pessoa ("we propose" → "this paper proposes"), aplicar o protocolo de siglas (termo completo na primeira ocorrência, sigla nas demais), construir um mapa de termos canônicos e eliminar rotação de sinônimos, remover construções proibidas ("it is worth noting that", "very", "extremely" sem quantificação), e equilibrar voz ativa e passiva conforme a convenção IEEE. Entrega o manuscrito conforme mais um bloco `## Notas de Estilo` listando itens que requerem ação do autor (quantificação ausente, escolhas específicas do periódico, citações malformadas).
+Receives the Editorial text and applies the specific conventions of IEEE Transactions and IEEE Access. Responsibilities: replace first-person constructions ("we propose" → "this paper proposes"), apply the acronym protocol (full term on first occurrence, acronym thereafter), build a canonical term map and eliminate synonym rotation, remove forbidden constructions ("it is worth noting that", "very", "extremely" without quantification), and balance active and passive voice per IEEE convention. Delivers the manuscript plus a `## Style Notes` block listing items that require author action.
 
 <img src="14.png" width="64" />
 
-### Etapa 4 — Revisor
+### Stage 4 — Reviewer
 
-Atua como revisor anônimo por pares. O agente Revisor não reescreve — diagnostica. Identifica: afirmações sem citação ou suporte quantitativo, contradições entre hipóteses declaradas e resultados apresentados, detalhes experimentais ausentes necessários para reprodutibilidade, declarações de escopo que excedem o que o artigo entrega, lacunas lógicas entre argumentos consecutivos, e falhas estruturais (resumo não autocontido, conclusão introduzindo material novo). O que pode ser corrigido diretamente (sentenças redundantes, referências pronominais ambíguas, violações de paralelismo) é corrigido inline. Todo o restante aparece num `## Relatório do Revisor` estruturado com localização por seção e parágrafo, indicando exatamente o que o autor precisa fornecer para resolver cada problema.
+Acts as an anonymous peer reviewer. The Reviewer agent does not rewrite — it diagnoses. Identifies: claims without citation or quantitative support, contradictions between stated hypotheses and presented results, missing experimental details required for reproducibility, scope statements that exceed what the paper delivers, logical gaps between consecutive arguments, and structural failures (non-self-contained abstract, conclusion introducing new material). What can be corrected directly (redundant sentences, ambiguous pronoun references, parallelism violations) is fixed inline. Everything else appears in a structured `## Reviewer Report` with section and paragraph location, stating exactly what the author must provide to resolve each issue.
 
 ---
 
-**Analogia prática:**
+**Practical analogy:**
 
-| Etapa | Papel |
+| Stage | Role |
 |---|---|
-| Autor | Pesquisador sênior que escreve o primeiro draft completo |
-| Editorial | Editor de texto que apara as arestas linguísticas |
-| Estilo IEEE | Copidesque que formata para o periódico específico |
-| Revisor | Árbitro anônimo que decide aceitação ou revisão |
+| Author | Senior researcher writing the complete first draft |
+| Editorial | Copy editor refining linguistic quality |
+| IEEE Style | Copydesk formatting for the specific journal |
+| Reviewer | Anonymous referee deciding acceptance or revision |
 
-## Skills disponíveis individualmente
+## Individual skills
 
-Além do pipeline completo, cada etapa está disponível como comando independente:
+In addition to the full pipeline, each stage is available as an independent command:
 
-| Comando | Executa |
+| Command | Runs |
 |---|---|
-| `/ieee-paper-writer` | Pipeline completo: Autor → Editorial → Estilo → Revisor |
-| `/author <texto>` | Somente Etapa 1 — draft a partir de notas brutas |
-| `/editorial <texto>` | Somente Etapa 2 — fluência e ritmo |
-| `/ieee-style <texto>` | Somente Etapa 3 — aplicação das convenções IEEE |
-| `/reviewer <texto>` | Somente Etapa 4 — revisão anônima por pares |
-| `/author-mode` | Ativa modo de escrita acadêmica persistente em todas as respostas |
+| `/ieee-paper-writer` | Full pipeline: Author → Editorial → Style → Reviewer |
+| `/author <text>` | Stage 1 only — draft from raw notes |
+| `/editorial <text>` | Stage 2 only — fluency and rhythm |
+| `/ieee-style <text>` | Stage 3 only — IEEE convention enforcement |
+| `/reviewer <text>` | Stage 4 only — anonymous peer review |
+| `/author-mode` | Activates persistent academic writing mode for all responses |
 
-## Instalação
+## Installation
 
-Uma linha. Detecta todos os agentes na sua máquina. Instala para cada um.
+One line. Detects all agents on your machine. Installs for each one.
 
 ```bash
 # macOS / Linux / WSL / Git Bash
-curl -fsSL https://raw.githubusercontent.com/ivan-neves/ieee-paper-writer/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/igorantunes30/author-IA-article/main/install.sh | bash
 
 # Windows (PowerShell 5.1+)
-irm https://raw.githubusercontent.com/ivan-neves/ieee-paper-writer/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/igorantunes30/author-IA-article/main/install.ps1 | iex
 ```
 
-~30 segundos. Requer Node ≥18. Seguro para re-executar.
+~30 seconds. Requires Node ≥18. Safe to re-run.
 
-**Ativação:** cole um rascunho, diga "escreva a introdução", ou digite `/ieee-paper-writer`. O pipeline roda automaticamente quando você mencionar manuscrito, artigo IEEE, revisão por pares ou escrita acadêmica.
+**Activation:** paste a draft, say "write the introduction", or type `/ieee-paper-writer`. The pipeline runs automatically when you mention manuscript, IEEE paper, peer review, or academic writing.
 
-Apenas um agente, ou 30+ outros → [**INSTALL.md**](./INSTALL.md).
+Single agent, or 30+ others → [**INSTALL.md**](./INSTALL.md).
 
-## O que você recebe
+## What you get
 
-| Skill / Agente | Função |
+| Skill / Agent | Function |
 |---|---|
-| `/ieee-paper-writer` | Executa o pipeline completo de quatro etapas em qualquer entrada. |
-| `ieee-paper-author` | Etapa 1 — redige seções técnicas completas a partir de notas ou esboços. |
-| `ieee-paper-editorial` | Etapa 2 — refina fluência e estrutura de parágrafo sem tocar no conteúdo. |
-| `ieee-paper-style` | Etapa 3 — aplica convenções linguísticas IEEE. |
-| `ieee-paper-reviewer` | Etapa 4 — revisão por pares anônima. Diagnostica problemas científicos e lógicos. |
+| `/ieee-paper-writer` | Runs the complete four-stage pipeline on any input. |
+| `ieee-paper-author` | Stage 1 — drafts complete technical sections from notes or outlines. |
+| `ieee-paper-editorial` | Stage 2 — refines fluency and paragraph structure without touching content. |
+| `ieee-paper-style` | Stage 3 — applies IEEE linguistic conventions. |
+| `ieee-paper-reviewer` | Stage 4 — anonymous peer review. Diagnoses scientific and logical issues. |
 
-### Periódicos suportados
+### Supported journals
 
-| Alvo | Estilo aplicado |
+| Target | Style applied |
 |--------|---------------|
-| IEEE Transactions / IEEE Access | Convenções IEEE completas (impessoalidade, protocolo de siglas, equilíbrio passiva/ativa) |
-| Elsevier / Springer | Inglês acadêmico formal, estrutura de seções, estilo de citação |
-| ACM | Precisão técnica, linguagem de reprodutibilidade |
-| Nature Portfolio | Prosa científica concisa, acessibilidade ampla |
-| Qualis A (CAPES) | Padrões brasileiros de periódicos de alto impacto |
+| IEEE Transactions / IEEE Access | Full IEEE conventions (impersonality, acronym protocol, passive/active balance) |
+| Elsevier / Springer | Formal academic English, section structure, citation style |
+| ACM | Technical precision, reproducibility language |
+| Nature Portfolio | Concise scientific prose, broad accessibility |
+| Qualis A (CAPES) | Brazilian high-impact journal standards |
 
-### Formato de saída
+### Output format
 
-Cada execução produz três blocos:
-
-```
-## Texto Final
-[seção de manuscrito limpa e conforme IEEE]
-
-## Notas de Estilo
-[itens que requerem ação do autor — citações ausentes, escolhas específicas do periódico,
- valores marcados com X que precisam de números reais]
-
-## Relatório do Revisor
-### Problemas Maiores
-### Problemas Menores
-### Corrigidos Nesta Passagem
-```
-
-### Idioma
-
-- **Entrada:** Português ou inglês.
-- **Saída do manuscrito:** sempre em inglês (exigência IEEE).
-- **Notas de Estilo e Relatório do Revisor:** no idioma da entrada do usuário.
-
-## Exemplos de uso
+Each run produces three blocks:
 
 ```
-/ieee-paper-writer Seção de Introdução para artigo sobre otimização distribuída em redes de sensores
+## Final Text
+[clean, IEEE-compliant manuscript section]
+
+## Style Notes
+[items requiring author action — missing citations, journal-specific choices,
+ X-marked values that need real numbers]
+
+## Reviewer Report
+### Major Issues
+### Minor Issues
+### Corrected in This Pass
 ```
 
+### Language
+
+- **Input:** Portuguese or English.
+- **Manuscript output:** always in English (IEEE requirement).
+- **Style Notes and Reviewer Report:** in the user's input language.
+
+## Usage examples
+
 ```
-/ieee-paper-writer [cole seu rascunho bruto ou lista de tópicos aqui]
+/ieee-paper-writer Introduction section for a paper on distributed optimization in sensor networks
 ```
 
 ```
-/ieee-paper-writer Reescreva minha seção de metodologia de forma mais formal
+/ieee-paper-writer [paste your raw draft or bullet list here]
 ```
 
 ```
-/ieee-paper-writer Faça revisão por pares deste abstract: [texto]
+/ieee-paper-writer Rewrite my methodology section in a more formal style
 ```
 
-## Seções suportadas
+```
+/ieee-paper-writer Peer review this abstract: [text]
+```
 
-Resumo · Introdução · Trabalhos Relacionados · Fundamentação Teórica · Metodologia · Abordagem Proposta ·
-Formulação Matemática · Arquitetura · Algoritmo · Configuração Experimental · Resultados ·
-Discussão · Conclusão · Trabalhos Futuros · Agradecimentos
+## Supported sections
 
-## Como funciona
+Abstract · Introduction · Related Work · Background · Methodology · Proposed Approach ·
+Mathematical Formulation · Architecture · Algorithm · Experimental Setup · Results ·
+Discussion · Conclusion · Future Work · Acknowledgments
 
-1. Você fornece o material bruto — tópicos, prosa aproximada ou draft completo.
-2. O agente **Autor** estrutura o conteúdo e escreve um draft técnico completo.
-3. O agente **Editorial** refina linguagem, ritmo e lógica de parágrafo.
-4. O agente **Estilo IEEE** aplica convenções específicas do periódico.
-5. O agente **Revisor** diagnostica problemas restantes como revisor anônimo por pares.
-6. Você recebe o manuscrito final, notas de estilo e um relatório do revisor.
+## How it works
 
-O inglês acadêmico formal é mantido durante toda a geração do manuscrito.
+1. Provide raw material — bullet points, rough prose, or a complete draft.
+2. The **Author** agent structures the content and writes a complete technical draft.
+3. The **Editorial** agent refines language, rhythm, and paragraph logic.
+4. The **IEEE Style** agent applies journal-specific conventions.
+5. The **Reviewer** agent diagnoses remaining issues as an anonymous peer reviewer.
+6. The final manuscript, style notes, and reviewer report are returned.
+
+Formal academic English is maintained throughout manuscript generation.
 
 ## Links
 
-- [INSTALL.md](./INSTALL.md) — matriz completa de instalação, todas as flags, detalhes por agente
-- [CONTRIBUTING.md](./CONTRIBUTING.md) — como enviar uma contribuição
-- [CLAUDE.md](./CLAUDE.md) — guia do mantenedor
-- [Issues](https://github.com/ivan-neves/ieee-paper-writer/issues) — bug, funcionalidade ou comportamento inesperado
+- [INSTALL.md](./INSTALL.md) — full installation matrix, all flags, per-agent details
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — how to submit a contribution
+- [CLAUDE.md](./CLAUDE.md) — maintainer guide
+- [Issues](https://github.com/igorantunes30/author-IA-article/issues) — bug, feature, or unexpected behavior
 
-## Licença
+## License
 
 MIT.
